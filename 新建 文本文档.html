@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极简搜索主页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#0FC6C2',
+            accent: '#722ED1',
+            dark: '#1D2129',
+            light: '#F2F3F5'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .bg-glass {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .text-shadow {
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      }
+      .hover-scale {
+        transition: transform 0.3s ease;
+      }
+      .hover-scale:hover {
+        transform: scale(1.05);
+      }
+    }
+  </style>
+</head>
+<body class="font-inter min-h-screen text-white overflow-x-hidden">
+  <!-- 背景图设置 -->
+  <div id="bg" class="fixed inset-0 z-0">
+    <img src="https://data.klpbbs.com/file/tc/img/2024/06/13/666b01a6b3d17.png" 
+         alt="背景图" 
+         class="w-full h-full object-cover"
+         onload="adjustBackgroundOverlay()">
+  </div>
+
+  <!-- 背景遮罩（增强文字可读性） -->
+  <div id="bgOverlay" class="fixed inset-0 z-0 bg-black/30"></div>
+
+  <!-- 主内容区 -->
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
+    <!-- 顶部设置按钮 -->
+    <div class="absolute top-6 right-6">
+      <button id="settingsBtn" class="p-2 rounded-full hover:bg-white/20 transition-colors">
+        <i class="fa fa-cog text-xl"></i>
+      </button>
+    </div>
+    
+    <!-- 时间和日期显示 -->
+    <div class="mb-12 text-center">
+      <div id="time" class="text-[clamp(3rem,10vw,5rem)] font-light text-shadow mb-2">00:00</div>
+      <div id="date" class="text-[clamp(1rem,3vw,1.25rem)] text-white/80">星期一 2023年1月1日</div>
+    </div>
+    
+    <!-- 搜索区域 -->
+    <div class="w-full max-w-2xl mb-12">
+      <!-- 搜索引擎选择 -->
+      <div class="flex justify-center space-x-2 mb-4">
+        <button id="searchEngineBaidu" class="search-engine-btn px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 transition-all active">
+          <i class="fa fa-search mr-2"></i>百度
+        </button>
+        <button id="searchEngineBing" class="search-engine-btn px-4 py-2 rounded-full bg-white/10 hover:bg-white/30 transition-all">
+          <i class="fa fa-search mr-2"></i>必应
+        </button>
+        <button id="searchEngineGoogle" class="search-engine-btn px-4 py-2 rounded-full bg-white/10 hover:bg-white/30 transition-all">
+          <i class="fa fa-search mr-2"></i>谷歌
+        </button>
+      </div>
+      
+      <!-- 搜索框 -->
+      <div class="relative">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="w-full px-6 py-4 rounded-full bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-white/60 text-white text-lg"
+          placeholder="输入搜索内容..."
+        >
+        <button id="searchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full hover:bg-white/20 transition-colors">
+          <i class="fa fa-arrow-right text-xl"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 快捷方式 -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full max-w-4xl">
+      <!-- 快捷方式 1 -->
+      <a href="https://www.baidu.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#1A73E8]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-search text-xl text-[#1A73E8]"></i>
+        </div>
+        <span class="text-sm font-medium">百度</span>
+      </a>
+      
+      <!-- 快捷方式 2 -->
+      <a href="https://www.bing.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#00838F]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-search text-xl text-[#00838F]"></i>
+        </div>
+        <span class="text-sm font-medium">必应</span>
+      </a>
+      
+      <!-- 快捷方式 3 -->
+      <a href="https://www.github.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#333]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-github text-xl text-[#333]"></i>
+        </div>
+        <span class="text-sm font-medium">GitHub</span>
+      </a>
+      
+      <!-- 快捷方式 4 -->
+      <a href="https://www.zhihu.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#0F88EB]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-comment text-xl text-[#0F88EB]"></i>
+        </div>
+        <span class="text-sm font-medium">知乎</span>
+      </a>
+      
+      <!-- 快捷方式 5 -->
+      <a href="https://www.bilibili.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#FB7299]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-play-circle text-xl text-[#FB7299]"></i>
+        </div>
+        <span class="text-sm font-medium">B站</span>
+      </a>
+      
+      <!-- 快捷方式 6 -->
+      <a href="https://www.taobao.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#FF4400]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-shopping-cart text-xl text-[#FF4400]"></i>
+        </div>
+        <span class="text-sm font-medium">淘宝</span>
+      </a>
+      
+      <!-- 快捷方式 7 -->
+      <a href="https://www.youku.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#ED2939]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-film text-xl text-[#ED2939]"></i>
+        </div>
+        <span class="text-sm font-medium">优酷</span>
+      </a>
+      
+      <!-- 快捷方式 8 -->
+      <a href="https://www.jd.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#E4393C]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-gift text-xl text-[#E4393C]"></i>
+        </div>
+        <span class="text-sm font-medium">京东</span>
+      </a>
+      
+      <!-- 快捷方式 9 -->
+      <a href="https://www.weibo.com" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-[#E6162D]/20 flex items-center justify-center mb-2">
+          <i class="fa fa-weibo text-xl text-[#E6162D]"></i>
+        </div>
+        <span class="text-sm font-medium">微博</span>
+      </a>
+      
+      <!-- 快捷方式 10 -->
+      <button id="addShortcutBtn" class="shortcut-item bg-glass rounded-xl p-4 flex flex-col items-center justify-center hover-scale">
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2">
+          <i class="fa fa-plus text-xl"></i>
+        </div>
+        <span class="text-sm font-medium">添加</span>
+      </button>
+    </div>
+    
+    <!-- 底部信息 -->
+    <div class="absolute bottom-6 left-0 right-0 text-center text-white/60 text-sm">
+      <p>极简搜索主页 | 按 Enter 键搜索</p>
+    </div>
+  </div>
+
+  <!-- 设置面板 (默认隐藏) -->
+  <div id="settingsPanel" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center transform translate-y-full transition-transform duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 mx-4 shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-dark">设置</h3>
+        <button id="closeSettingsBtn" class="p-2 hover:bg-gray-100 rounded-full">
+          <i class="fa fa-times text-dark"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-6">
+        <!-- 背景设置 -->
+        <div>
+          <h4 class="font-medium text-dark mb-3">背景设置</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="bg-gradient-to-br from-primary to-secondary p-1 rounded-lg hover:opacity-80 active-bg">
+              <div class="h-12 rounded bg-cover" style="background-image: url('https://data.klpbbs.com/file/tc/img/2024/06/13/666b01a6b3d17.png')"></div>
+            </button>
+            <button class="bg-gradient-to-br from-red-500 to-yellow-500 p-1 rounded-lg hover:opacity-80">
+              <div class="h-12 rounded bg-cover" style="background-image: url('https://picsum.photos/200/300?random=2')"></div>
+            </button>
+            <button class="bg-gradient-to-br from-green-500 to-blue-500 p-1 rounded-lg hover:opacity-80">
+              <div class="h-12 rounded bg-cover" style="background-image: url('https://picsum.photos/200/300?random=3')"></div>
+            </button>
+          </div>
+          <button class="mt-3 w-full py-2 border border-gray-300 rounded-lg text-dark hover:bg-gray-50">
+            <i class="fa fa-upload mr-2"></i>上传背景图片
+          </button>
+        </div>
+        
+        <!-- 快捷方式管理 -->
+        <div>
+          <h4 class="font-medium text-dark mb-3">快捷方式管理</h4>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-[#1A73E8]/20 flex items-center justify-center mr-3">
+                  <i class="fa fa-search text-[#1A73E8]"></i>
+                </div>
+                <span class="text-dark">百度</span>
+              </div>
+              <div class="flex space-x-2">
+                <button class="text-gray-500 hover:text-dark">
+                  <i class="fa fa-pencil"></i>
+                </button>
+                <button class="text-gray-500 hover:text-red-500">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <!-- 其他快捷方式类似结构 -->
+          </div>
+        </div>
+        
+        <!-- 更多设置 -->
+        <div>
+          <h4 class="font-medium text-dark mb-3">更多设置</h4>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+              <span class="text-dark">显示天气</span>
+              <div class="relative inline-block w-10 h-5">
+                <input type="checkbox" class="opacity-0 w-0 h-0" checked>
+                <span class="absolute cursor-pointer inset-0 bg-primary rounded-full transition"></span>
+              </div>
+            </label>
+            <label class="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
+              <span class="text-dark">自动更换背景</span>
+              <div class="relative inline-block w-10 h-5">
+                <input type="checkbox" class="opacity-0 w-0 h-0">
+                <span class="absolute cursor-pointer inset-0 bg-gray-300 rounded-full transition"></span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <button id="saveSettingsBtn" class="mt-8 w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        保存设置
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 全局变量
+    let currentEngine = 'baidu'; // 默认搜索引擎
+    const engines = {
+      baidu: 'https://www.baidu.com/s?wd=',
+      bing: 'https://www.bing.com/search?q=',
+      google: 'https://www.google.com/search?q='
+    };
+    
+    // DOM 加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化时间和日期显示
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      
+      // 初始化搜索功能
+      initSearch();
+      
+      // 初始化设置面板交互
+      initSettingsPanel();
+      
+      // 初始化搜索引擎切换
+      initEngineSwitch();
+      
+      // 初始化添加快捷方式按钮
+      initAddShortcut();
+    });
+    
+    // 更新时间和日期
+    function updateDateTime() {
+      const now = new Date();
+      
+      // 更新时间
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+      
+      // 更新日期
+      const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const date = String(now.getDate()).padStart(2, '0');
+      const weekday = weekdays[now.getDay()];
+      document.getElementById('date').textContent = `${weekday} ${year}年${month}月${date}日`;
+    }
+    
+    // 初始化搜索功能
+    function initSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      
+      // 点击搜索按钮
+      searchBtn.addEventListener('click', function() {
+        performSearch();
+      });
+      
+      // 按 Enter 键搜索
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+    }
+    
+    // 执行搜索
+    function performSearch() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      if (!keyword) return;
+      
+      const searchUrl = engines[currentEngine] + encodeURIComponent(keyword);
+      window.location.href = searchUrl;
+    }
+    
+    // 初始化搜索引擎切换
+    function initEngineSwitch() {
+      const engineBtns = document.querySelectorAll('.search-engine-btn');
+      
+      engineBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // 移除所有按钮的 active 状态
+          engineBtns.forEach(b => {
+            b.classList.remove('active');
+            b.classList.remove('bg-white/20');
+            b.classList.add('bg-white/10');
+          });
+          
+          // 添加当前按钮的 active 状态
+          this.classList.add('active');
+          this.classList.remove('bg-white/10');
+          this.classList.add('bg-white/20');
+          
+          // 更新当前搜索引擎
+          if (this.id === 'searchEngineBaidu') {
+            currentEngine = 'baidu';
+          } else if (this.id === 'searchEngineBing') {
+            currentEngine = 'bing';
+          } else if (this.id === 'searchEngineGoogle') {
+            currentEngine = 'google';
+          }
+        });
+      });
+    }
+    
+    // 初始化设置面板
+    function initSettingsPanel() {
+      const settingsBtn = document.getElementById('settingsBtn');
+      const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+      const settingsPanel = document.getElementById('settingsPanel');
+      const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+      
+      // 打开设置面板
+      settingsBtn.addEventListener('click', function() {
+        settingsPanel.classList.remove('translate-y-full');
+      });
+      
+      // 关闭设置面板
+      closeSettingsBtn.addEventListener('click', function() {
+        settingsPanel.classList.add('translate-y-full');
+      });
+      
+      // 保存设置
+      saveSettingsBtn.addEventListener('click', function() {
+        // 这里可以添加保存设置的逻辑
+        alert('设置已保存！');
+        settingsPanel.classList.add('translate-y-full');
+      });
+    }
+    
+    // 初始化添加快捷方式功能
+    function initAddShortcut() {
+      const addShortcutBtn = document.getElementById('addShortcutBtn');
+      
+      addShortcutBtn.addEventListener('click', function() {
+        // 这里可以添加打开添加快捷方式对话框的逻辑
+        alert('添加快捷方式功能开发中...');
+      });
+    }
+    
+    // 调整背景遮罩
+    function adjustBackgroundOverlay() {
+      // 这里可以添加根据图片亮度自动调整遮罩透明度的逻辑
+      // 简化版：默认使用 30% 透明度遮罩
+      document.getElementById('bgOverlay').style.opacity = '0.3';
+    }
+  </script>
+</body>
+</html>
+帮我根据这个主页做一个插件
